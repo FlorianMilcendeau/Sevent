@@ -29,9 +29,7 @@ module sevent::event_tests {
 
         test_scenario::next_tx(scenario, &USER1_ADDRESS);
         {
-            assert!(test_scenario::can_take_owned<Event>(scenario), 0);
-            let event = test_scenario::take_owned<Event>(scenario);
-            test_scenario::return_owned(scenario, event);
+            assert!(!test_scenario::can_take_owned<Event>(scenario), 0);
         };
     }
 }
