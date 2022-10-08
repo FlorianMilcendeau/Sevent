@@ -9,9 +9,9 @@ module sevent::ticket {
 
     struct Ticket has key, store {
         id: UID,
-        /// Title for the token
+        /// Title for the NFT
         title: String,
-        /// URL for the token
+        /// URL for the NFT
         url: Url,
         /// The parent ID of the NFT
         parent_id: ID
@@ -22,7 +22,7 @@ module sevent::ticket {
         object_id: ID,
         /// The creator of the NFT
         creator: address,
-        /// The name of the NFT
+        /// The title of the NFT
         title: String,
     }
 
