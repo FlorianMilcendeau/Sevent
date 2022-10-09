@@ -15,7 +15,6 @@ module sevent::event_tests {
         let scenario = &mut test_scenario::begin(&ADMIN);
         {
             event::create_event(
-                ADMIN, 
                 TITLE, 
                 DESCRIPTION, 
                 STATUS, 
