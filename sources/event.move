@@ -1,7 +1,8 @@
 module sevent::event {
     use sui::object::{Self, UID};
     use std::string::{Self, String};
-    use sui::tx_context::TxContext;
+    use sui::tx_context::{Self, TxContext};
+    use sui::transfer;
 
     struct Event has key, store {
         id: UID,
@@ -22,7 +23,6 @@ module sevent::event {
     }
 
     public entry fun create_event(
-        recipient: address, 
         title: vector<u8>, 
         description: vector<u8>, 
         status: vector<u8>, 
@@ -32,7 +32,7 @@ module sevent::event {
         end_date: u64,
         ctx: &mut TxContext
     ) {
-        use sui::transfer;
+        let sender = tx_context::sender(ctx);
 
         let event = Event {
             id: object::new(ctx),
@@ -45,6 +45,6 @@ module sevent::event {
             start_date,
         };
 
-        transfer::transfer(event, recipient);
+        transfer::transfer(event, sender);
     }
 }

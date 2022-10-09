@@ -36,7 +36,6 @@ module sevent::ticket_tests {
 
         {
             event::create_event(
-                ADMIN, 
                 TITLE_EVENT, 
                 DESCRIPTION_EVENT, 
                 STATUS_EVENT, 
