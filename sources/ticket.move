@@ -1,11 +1,13 @@
 module sevent::ticket {
-    use sui::event;
-    use sui::object::{Self, ID, UID};
-    use sevent::event::Event;
     use std::string::{Self, String};
+
+    use sui::event::emit;
+    use sui::object::{Self, ID, UID};
+    use sui::url::{Self, Url};
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
-    use sui::url::{Self, Url};
+    
+    use sevent::event::Event;
 
     struct Ticket has key, store {
         id: UID,
@@ -13,8 +15,8 @@ module sevent::ticket {
         title: String,
         /// URL for the NFT
         url: Url,
-        /// The parent ID of the NFT
-        parent_id: ID
+        /// The Event ID of the NFT
+        event_id: ID,
     }
 
     struct TicketMinted has copy, drop {
@@ -27,25 +29,31 @@ module sevent::ticket {
     }
 
     public entry fun mint_to_sender(
-        event: &Event,
+        event_ref: &mut Event,
         title: vector<u8>,
         url: vector<u8>,
-        ctx: &mut TxContext
+        supply: u64,
+        ctx: &mut TxContext,
     ) {
         let sender = tx_context::sender(ctx);
-        let nft = Ticket {
-            id: object::new(ctx),
-            title: string::utf8(title),
-            url: url::new_unsafe_from_bytes(url),
-            parent_id: object::id(event)
-        };
+        let i = 0;
 
-        event::emit(TicketMinted {
-            object_id: object::id(&nft),
-            creator: sender,
-            title: nft.title,
-        });
+        while (i < supply) {
+            let ticket = Ticket {
+                id: object::new(ctx),
+                title: string::utf8(title),
+                url: url::new_unsafe_from_bytes(url),
+                event_id: object::id(event_ref),
+            };
 
-        transfer::transfer(nft, sender);
+            emit(TicketMinted {
+                object_id: object::id(&ticket),
+                creator: sender,
+                title: ticket.title,
+            });
+
+            transfer::transfer(ticket, sender);
+            i = i + 1; 
+        }
     }
 }

@@ -1,8 +1,9 @@
 module sevent::event {
-    use sui::object::{Self, UID};
     use std::string::{Self, String};
-    use sui::tx_context::{Self, TxContext};
+
+    use sui::object::{Self, UID};
     use sui::transfer;
+    use sui::tx_context::{Self, TxContext};
 
     struct Event has key, store {
         id: UID,
@@ -12,10 +13,6 @@ module sevent::event {
 	    description: String,
         /// Event's Status
 	    status: String,
-        /// minimum price ticket of event
-	    price_min: u64,
-        /// minimum price ticket of event
-	    price_max: u64,
         /// Event start date
 	    start_date: u64,
         /// Event end date
@@ -26,8 +23,6 @@ module sevent::event {
         title: vector<u8>, 
         description: vector<u8>, 
         status: vector<u8>, 
-        price_min: u64, 
-        price_max: u64,
         start_date: u64,
         end_date: u64,
         ctx: &mut TxContext
@@ -39,8 +34,6 @@ module sevent::event {
             title: string::utf8(title),
             description: string::utf8(description),
             status: string::utf8(status),
-            price_min,
-            price_max,
             end_date,
             start_date,
         };

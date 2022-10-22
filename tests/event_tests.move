@@ -1,6 +1,7 @@
 #[test_only]
 module sevent::event_tests {
     use sevent::event::{Self, Event};
+    
     use sui::test_scenario;
 
     const ADMIN: address = @0xABBA;
@@ -12,23 +13,30 @@ module sevent::event_tests {
 
     #[test]
     public fun test_create_event() {
-        let scenario = &mut test_scenario::begin(&ADMIN);
+        let scenario = test_scenario::begin(ADMIN);
         {
             event::create_event(
                 TITLE, 
                 DESCRIPTION, 
-                STATUS, 
-                5, 
-                100, 
+                STATUS,
                 1664115386304, 
                 1664015286304, 
-                test_scenario::ctx(scenario)
+                test_scenario::ctx(&mut scenario)
             );
         };
 
-        test_scenario::next_tx(scenario, &USER1_ADDRESS);
+        test_scenario::next_tx(&mut scenario, USER1_ADDRESS);
         {
-            assert!(!test_scenario::can_take_owned<Event>(scenario), 0);
+            let has_token = test_scenario::has_most_recent_for_sender<Event>(&mut scenario);
+            assert!(!has_token, 0);
         };
+
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let has_token = test_scenario::has_most_recent_for_sender<Event>(&mut scenario);
+            assert!(has_token, 0);
+        };
+
+        test_scenario::end(scenario);
     }
 }

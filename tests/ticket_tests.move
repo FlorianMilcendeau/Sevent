@@ -1,8 +1,13 @@
 #[test_only]
 module sevent::ticket_tests {
+    use std::vector;
+
+    use sui::object;
+    use sui::test_scenario;
+    use sui::transfer;
+    
     use sevent::ticket::{Self, Ticket};
     use sevent::event::{Self, Event};
-    use sui::test_scenario;
 
     const ADMIN: address = @0xABBA;
     const USER1_ADDRESS: address = @0xA001;
@@ -32,40 +37,47 @@ module sevent::ticket_tests {
 
     #[test]
     public fun test_mint_ticket() {
-        let scenario = &mut test_scenario::begin(&ADMIN);
+        let scenario = test_scenario::begin(ADMIN);
 
         {
             event::create_event(
                 TITLE_EVENT, 
                 DESCRIPTION_EVENT, 
-                STATUS_EVENT, 
-                5, 
-                100, 
+                STATUS_EVENT,
                 1664115386304, 
                 1664015286304, 
-                test_scenario::ctx(scenario)
+                test_scenario::ctx(&mut scenario)
             );
             
         };
 
-        test_scenario::next_tx(scenario, &ADMIN);
+        test_scenario::next_tx(&mut scenario, ADMIN);
         {
-            let event = test_scenario::take_owned<Event>(scenario);
+            let event = test_scenario::take_from_address<Event>(&mut scenario, ADMIN);
             
-            ticket::mint_to_sender(&event, TITLE_TICKET, URL_TICKET, test_scenario::ctx(scenario));
-            test_scenario::return_owned(scenario, event);
+            ticket::mint_to_sender(&mut event, TITLE_TICKET, URL_TICKET, 10, test_scenario::ctx(&mut scenario));
+            test_scenario::return_to_sender(&mut scenario, event);
         };
 
-        test_scenario::next_tx(scenario, &USER1_ADDRESS);
+        test_scenario::next_tx(&mut scenario, USER1_ADDRESS);
         {
-            assert!(!test_scenario::can_take_owned<Ticket>(scenario), 0);
+            assert!(vector::length(&test_scenario::ids_for_sender<Ticket>(&mut scenario)) == 0, 0);
         };
 
-        test_scenario::next_tx(scenario, &ADMIN);
+        test_scenario::next_tx(&mut scenario, ADMIN);
         {
-            assert!(test_scenario::can_take_owned<Ticket>(scenario), 0);
-            let ticket = test_scenario::take_owned<Ticket>(scenario);
-            test_scenario::return_owned(scenario, ticket);
+            let ticketsID = test_scenario::ids_for_sender<Ticket>(&mut scenario);
+            let numberTicket: u64 = vector::length(&ticketsID); 
+            assert!(numberTicket == 10, 0);
+            
+            while (numberTicket > 0) {
+                let ticket = test_scenario::take_from_sender_by_id<Ticket>(&mut scenario, vector::pop_back(&mut ticketsID));
+                assert!(test_scenario::was_taken_from_address(ADMIN, object::id(&ticket)), 2);
+                transfer::transfer(ticket, ADMIN);
+                numberTicket = numberTicket - 1;
+            }
+
         };
+        test_scenario::end(scenario);
     }
 }
