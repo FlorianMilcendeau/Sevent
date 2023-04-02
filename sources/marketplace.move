@@ -48,14 +48,14 @@ module sevent::marketplace {
         let sender = tx_context::sender(ctx);
         let item = delist<T, C>(marketplace, item_id, sender);
 
-        transfer::transfer(item, sender);
+        transfer::public_transfer(item, sender);
     }
 
     public fun buy<T: key + store, C>(marketplace: &mut Marketplace, item_id: ID, received_amount: Coin<C>): T {
         let Listing<T, C> { item, owner, price } = dynamic_field::remove(&mut marketplace.id, item_id);
         
         assert!(price == coin::value(&received_amount), EAmountIncorrect);
-        transfer::transfer(received_amount, owner);
+        transfer::public_transfer(received_amount, owner);
 
         item
     }
@@ -64,6 +64,6 @@ module sevent::marketplace {
         let sender = tx_context::sender(ctx);
         let item = buy<T, C>(marketplace, item_id, received_amount);
 
-        transfer::transfer(item, sender);
+        transfer::public_transfer(item, sender);
     }
 }
