@@ -73,7 +73,7 @@ module sevent::ticket_tests {
             while (numberTicket > 0) {
                 let ticket = test_scenario::take_from_sender_by_id<Ticket>(&mut scenario, vector::pop_back(&mut ticketsID));
                 assert!(test_scenario::was_taken_from_address(ADMIN, object::id(&ticket)), 2);
-                transfer::transfer(ticket, ADMIN);
+                transfer::public_transfer(ticket, ADMIN);
                 numberTicket = numberTicket - 1;
             }
 
